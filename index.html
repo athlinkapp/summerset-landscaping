@@ -1657,6 +1657,7 @@
       <video id="heroVideo" autoplay muted loop playsinline webkit-playsinline preload="auto" poster="./poster.jpg">
         <source src="./MainVid.mp4" type="video/mp4" />
       </video>
+      <div id="videoOverlay" style="position:absolute;inset:0;z-index:1;cursor:default;"></div>
     </div>
     <div class="hero-overlay"></div>
     <div class="hero-grain" aria-hidden="true"></div>
@@ -2238,27 +2239,25 @@
       heroVideo.setAttribute('playsinline', '');
       heroVideo.setAttribute('webkit-playsinline', '');
 
-      let lowPowerMode = false;
+      const overlay = document.getElementById('videoOverlay');
 
       function attemptPlay() {
-        if (!heroVideo.paused || lowPowerMode) return;
-        heroVideo.play().catch(err => {
-          // Low Power Mode or autoplay policy block — retry on any user touch
-          lowPowerMode = true;
-          const resume = () => {
-            lowPowerMode = false;
-            heroVideo.play().catch(() => {});
-          };
-          window.addEventListener('touchstart', resume, { once: true, passive: true });
-          window.addEventListener('click',      resume, { once: true, passive: true });
-        });
+        if (!heroVideo.paused) return;
+        heroVideo.play().then(() => {
+          // Playing — remove overlay so hero interactions work normally
+          if (overlay) overlay.remove();
+        }).catch(() => {});
       }
+
+      // Tapping anywhere (overlay or page) attempts play
+      overlay.addEventListener('touchstart', attemptPlay, { passive: true });
+      overlay.addEventListener('click', attemptPlay);
 
       ['loadeddata','canplaythrough','canplay','loadedmetadata'].forEach(e => {
         heroVideo.addEventListener(e, attemptPlay, { passive: true });
       });
 
-      ['pointerdown','touchstart','touchend','scroll','click'].forEach(evt => {
+      ['touchstart','scroll','click'].forEach(evt => {
         window.addEventListener(evt, attemptPlay, { passive: true });
       });
 
