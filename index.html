@@ -1657,7 +1657,7 @@
   <!-- ─────────────── HERO ─────────────── -->
   <section id="hero">
     <div class="hero-video-wrap">
-      <video id="heroVideo" autoplay muted loop playsinline>
+      <video id="heroVideo" autoplay muted loop playsinline webkit-playsinline x5-playsinline preload="auto">
         <source src="./MainVid.mp4" type="video/mp4" />
       </video>
     </div>
@@ -2229,11 +2229,20 @@
       navbar.classList.toggle('scrolled', window.scrollY > 60);
     }, { passive: true });
 
-    // ── HERO VIDEO PARALLAX + SCALE
+    // ── HERO VIDEO
     const heroVideo = document.getElementById('heroVideo');
     heroVideo.addEventListener('canplay', () => {
       heroVideo.classList.add('playing');
     });
+    // Force play on mobile — iOS Safari requires explicit call
+    const playPromise = heroVideo.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        // Retry on first user interaction if autoplay blocked
+        document.addEventListener('touchstart', () => heroVideo.play(), { once: true });
+        document.addEventListener('click', () => heroVideo.play(), { once: true });
+      });
+    }
 
     // ── MOBILE NAV
     const hamburger = document.getElementById('hamburger');
