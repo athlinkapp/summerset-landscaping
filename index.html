@@ -1608,6 +1608,8 @@
       .footer-grid { grid-template-columns: 1fr; gap: 2.5rem; }
       .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
       .footer-badges { justify-content: center; }
+
+      .scroll-indicator { display: none; }
     }
 
     /* ─────────────────────────────────────────────
@@ -2264,18 +2266,21 @@
 
     // ── HERO VIDEO
     const heroVideo = document.getElementById('heroVideo');
+    // Ensure muted is set programmatically (required for iOS autoplay)
+    heroVideo.muted = true;
+    heroVideo.setAttribute('muted', '');
     heroVideo.addEventListener('canplay', () => {
       heroVideo.classList.add('playing');
     });
-    // Force play on mobile — iOS Safari requires explicit call
-    const playPromise = heroVideo.play();
-    if (playPromise !== undefined) {
-      playPromise.catch(() => {
-        // Retry on first user interaction if autoplay blocked
-        document.addEventListener('touchstart', () => heroVideo.play(), { once: true });
-        document.addEventListener('click', () => heroVideo.play(), { once: true });
-      });
+    // Attempt play immediately
+    function attemptPlay() {
+      heroVideo.play().catch(() => {});
     }
+    attemptPlay();
+    // iOS Safari sometimes needs a second attempt after load
+    window.addEventListener('load', attemptPlay);
+    document.addEventListener('touchstart', attemptPlay, { once: true });
+    document.addEventListener('scroll', attemptPlay, { once: true, passive: true });
 
     // ── MOBILE NAV
     const hamburger = document.getElementById('hamburger');
