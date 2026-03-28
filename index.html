@@ -228,10 +228,10 @@
       height: 100%;
       object-fit: cover;
     }
-    #heroVideo::-webkit-media-controls { display: none !important; }
-    #heroVideo::-webkit-media-controls-panel { display: none !important; }
-    #heroVideo::-webkit-media-controls-play-button { display: none !important; }
-    #heroVideo::-webkit-media-controls-start-playback-button { display: none !important; }
+    #heroVideo::-webkit-media-controls,
+    #heroVideo::-webkit-media-controls-panel,
+    #heroVideo::-webkit-media-controls-play-button,
+    #heroVideo::-webkit-media-controls-start-playback-button,
     #heroVideo::-webkit-media-controls-overlay-play-button { display: none !important; }
 
     /* Multi-layer overlay: dark bottom, slight green tint */
@@ -1577,6 +1577,17 @@
       .footer-badges { justify-content: center; }
 
       .scroll-indicator { display: none; }
+
+      #heroVideo {
+        opacity: 0;
+        transition: opacity 0.6s ease;
+      }
+      #heroVideo.playing {
+        opacity: 1;
+      }
+      .hero-video-wrap {
+        background: url('./poster.jpg') center center / cover no-repeat;
+      }
     }
 
     /* ─────────────────────────────────────────────
@@ -2249,7 +2260,7 @@
       function attemptPlay() {
         if (!heroVideo.paused) return;
         heroVideo.play().then(() => {
-          // Playing — remove overlay so hero interactions work normally
+          heroVideo.classList.add('playing');
           if (overlay) overlay.remove();
         }).catch(() => {});
       }
