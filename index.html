@@ -1654,13 +1654,18 @@
   <!-- ─────────────── HERO ─────────────── -->
   <section id="hero">
     <div class="hero-video-wrap">
-      <video id="heroVideo" autoplay muted loop playsinline webkit-playsinline x5-playsinline preload="auto">
+      <video id="heroVideo" autoplay muted loop playsinline webkit-playsinline x5-playsinline preload="auto" disableRemotePlayback>
         <source src="./MainVid.mp4" type="video/mp4" />
       </video>
       <script>
         (function() {
           var v = document.getElementById('heroVideo');
           v.muted = true;
+          v.volume = 0;
+          ['loadstart','loadedmetadata','loadeddata','canplay','canplaythrough'].forEach(function(e) {
+            v.addEventListener(e, function() { v.play().catch(function(){}); }, { once: true, passive: true });
+          });
+          v.load();
           v.play().catch(function(){});
         })();
       </script>
@@ -2236,11 +2241,13 @@
     // ── HERO VIDEO
     const heroVideo = document.getElementById('heroVideo');
     heroVideo.muted = true;
+    heroVideo.volume = 0;
     function attemptPlay() { heroVideo.play().catch(() => {}); }
     attemptPlay();
     window.addEventListener('load', attemptPlay);
-    document.addEventListener('touchstart', attemptPlay, { once: true, passive: true });
-    document.addEventListener('scroll', attemptPlay, { once: true, passive: true });
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) attemptPlay();
+    });
 
     // ── MOBILE NAV
     const hamburger = document.getElementById('hamburger');
