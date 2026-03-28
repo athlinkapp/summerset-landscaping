@@ -1572,6 +1572,11 @@
       .footer-badges { justify-content: center; }
 
       .scroll-indicator { display: none; }
+
+      .hero-video-wrap {
+        position: fixed;
+        z-index: 0;
+      }
     }
 
     /* ─────────────────────────────────────────────
@@ -1654,7 +1659,7 @@
   <!-- ─────────────── HERO ─────────────── -->
   <section id="hero">
     <div class="hero-video-wrap">
-      <video id="heroVideo" autoplay muted loop playsinline preload="auto">
+      <video id="heroVideo" autoplay muted loop playsinline webkit-playsinline preload="auto" poster="./WhatWeDoPics/hf_20260328_025114_42ec88ce-0308-42c6-8a80-66b1571b1738.png">
         <source src="./MainVid.mp4" type="video/mp4" />
       </video>
     </div>
@@ -2232,20 +2237,33 @@
     heroVideo.volume = 0;
 
     if (window.innerWidth <= 768) {
+      heroVideo.muted    = true;
       heroVideo.autoplay = true;
-      heroVideo.loop = true;
+      heroVideo.loop     = true;
+      heroVideo.setAttribute('playsinline', '');
+      heroVideo.setAttribute('webkit-playsinline', '');
+
+      let lowPowerMode = false;
 
       function attemptPlay() {
-        if (!heroVideo.paused) return;
-        heroVideo.play().catch(() => {});
+        if (!heroVideo.paused || lowPowerMode) return;
+        heroVideo.play().catch(err => {
+          // Low Power Mode or autoplay policy block — retry on any user touch
+          lowPowerMode = true;
+          const resume = () => {
+            lowPowerMode = false;
+            heroVideo.play().catch(() => {});
+          };
+          window.addEventListener('touchstart', resume, { once: true, passive: true });
+          window.addEventListener('click',      resume, { once: true, passive: true });
+        });
       }
 
       ['loadeddata','canplaythrough','canplay','loadedmetadata'].forEach(e => {
         heroVideo.addEventListener(e, attemptPlay, { passive: true });
       });
 
-      ['pointerdown','pointerup','pointermove','mousedown','mouseup','mousemove',
-       'touchstart','touchend','keydown','scroll','click'].forEach(evt => {
+      ['pointerdown','touchstart','touchend','scroll','click'].forEach(evt => {
         window.addEventListener(evt, attemptPlay, { passive: true });
       });
 
