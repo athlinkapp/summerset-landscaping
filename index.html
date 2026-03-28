@@ -1654,7 +1654,9 @@
   <!-- ─────────────── HERO ─────────────── -->
   <section id="hero">
     <div class="hero-video-wrap">
-      <video id="heroVideo" autoplay muted loop playsinline src="./MainVid.mp4"></video>
+      <video id="heroVideo" autoplay muted loop playsinline preload="auto">
+        <source src="./MainVid.mp4" type="video/mp4" />
+      </video>
     </div>
     <div class="hero-overlay"></div>
     <div class="hero-grain" aria-hidden="true"></div>
@@ -2227,12 +2229,27 @@
     // ── HERO VIDEO
     const heroVideo = document.getElementById('heroVideo');
     heroVideo.muted = true;
+    heroVideo.autoplay = true;
+    heroVideo.loop = true;
     heroVideo.volume = 0;
-    function attemptPlay() { heroVideo.play().catch(() => {}); }
-    ['loadedmetadata','loadeddata','canplay','canplaythrough'].forEach(e => {
+
+    function attemptPlay() {
+      if (!heroVideo.paused) return;
+      heroVideo.play().catch(() => {});
+    }
+
+    ['loadeddata','canplaythrough','canplay','loadedmetadata'].forEach(e => {
       heroVideo.addEventListener(e, attemptPlay, { passive: true });
     });
+
+    ['pointerdown','pointerup','pointermove','mousedown','mouseup','mousemove',
+     'touchstart','touchend','keydown','scroll','click'].forEach(evt => {
+      window.addEventListener(evt, attemptPlay, { passive: true });
+    });
+
     attemptPlay();
+    setTimeout(attemptPlay, 200);
+    setTimeout(attemptPlay, 1000);
     window.addEventListener('load', attemptPlay);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) attemptPlay(); });
 
