@@ -1654,28 +1654,9 @@
   <!-- ─────────────── HERO ─────────────── -->
   <section id="hero">
     <div class="hero-video-wrap">
-      <video id="heroVideo" muted loop playsinline webkit-playsinline x5-playsinline disableRemotePlayback>
+      <video id="heroVideo" autoplay muted loop playsinline webkit-playsinline x5-playsinline disableRemotePlayback>
+        <source src="./MainVid.mp4" type="video/mp4" />
       </video>
-      <script>
-        (function() {
-          var v = document.getElementById('heroVideo');
-          v.muted = true;
-          v.volume = 0;
-          v.setAttribute('muted', '');
-          v.setAttribute('playsinline', '');
-          v.setAttribute('webkit-playsinline', '');
-          // Set src dynamically after muting — bypasses Safari autoplay block
-          var src = document.createElement('source');
-          src.src = './MainVid.mp4';
-          src.type = 'video/mp4';
-          v.appendChild(src);
-          v.load();
-          v.play().catch(function(){});
-          ['loadedmetadata','canplay','canplaythrough'].forEach(function(e) {
-            v.addEventListener(e, function() { v.play().catch(function(){}); }, { passive: true });
-          });
-        })();
-      </script>
     </div>
     <div class="hero-overlay"></div>
     <div class="hero-grain" aria-hidden="true"></div>
@@ -2250,11 +2231,12 @@
     heroVideo.muted = true;
     heroVideo.volume = 0;
     function attemptPlay() { heroVideo.play().catch(() => {}); }
+    ['loadedmetadata','loadeddata','canplay','canplaythrough'].forEach(e => {
+      heroVideo.addEventListener(e, attemptPlay, { passive: true });
+    });
     attemptPlay();
     window.addEventListener('load', attemptPlay);
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) attemptPlay();
-    });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) attemptPlay(); });
 
     // ── MOBILE NAV
     const hamburger = document.getElementById('hamburger');
