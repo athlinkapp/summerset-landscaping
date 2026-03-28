@@ -1572,15 +1572,6 @@
       .footer-badges { justify-content: center; }
 
       .scroll-indicator { display: none; }
-
-      #heroVideo {
-        display: none;
-      }
-      .hero-video-wrap {
-        background-image: url('./WhatWeDoPics/hf_20260328_025114_42ec88ce-0308-42c6-8a80-66b1571b1738.png');
-        background-size: cover;
-        background-position: center;
-      }
     }
 
     /* ─────────────────────────────────────────────
@@ -1663,19 +1654,26 @@
   <!-- ─────────────── HERO ─────────────── -->
   <section id="hero">
     <div class="hero-video-wrap">
-      <video id="heroVideo" autoplay muted loop playsinline webkit-playsinline x5-playsinline preload="auto" disableRemotePlayback poster="./WhatWeDoPics/hf_20260328_025114_42ec88ce-0308-42c6-8a80-66b1571b1738.png">
-        <source src="./MainVid.mp4" type="video/mp4" />
+      <video id="heroVideo" muted loop playsinline webkit-playsinline x5-playsinline disableRemotePlayback>
       </video>
       <script>
         (function() {
           var v = document.getElementById('heroVideo');
           v.muted = true;
           v.volume = 0;
-          ['loadstart','loadedmetadata','loadeddata','canplay','canplaythrough'].forEach(function(e) {
-            v.addEventListener(e, function() { v.play().catch(function(){}); }, { once: true, passive: true });
-          });
+          v.setAttribute('muted', '');
+          v.setAttribute('playsinline', '');
+          v.setAttribute('webkit-playsinline', '');
+          // Set src dynamically after muting — bypasses Safari autoplay block
+          var src = document.createElement('source');
+          src.src = './MainVid.mp4';
+          src.type = 'video/mp4';
+          v.appendChild(src);
           v.load();
           v.play().catch(function(){});
+          ['loadedmetadata','canplay','canplaythrough'].forEach(function(e) {
+            v.addEventListener(e, function() { v.play().catch(function(){}); }, { passive: true });
+          });
         })();
       </script>
     </div>
